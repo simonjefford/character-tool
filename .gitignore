@@ -1,0 +1,16 @@
+# Binary
+character-tool
+
+# Output files
+output/
+*.txt
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
