@@ -170,3 +170,41 @@ All 7 formatter tests pass.
 ### Next Steps
 - Implement CLI with input/output handling
 - Create example test file in testdata/
+
+## [2026-02-17] CLI Implementation
+
+### Implementation
+- Created `main.go` with CLI implementation:
+  - Flag parsing for `-input`, `-output`, `-verbose`
+  - File reading and markdown parsing
+  - Spell list loading
+  - Section processing (Traits, Actions, Bonus Actions, Reactions)
+  - Output file writing with proper naming
+  - Warning collection and display
+  - Status reporting for each section
+  - Empty section handling (skip file creation)
+
+### Example File
+- Created `testdata/example-character.md` with:
+  - All four section types
+  - Spell links ({{spell:Fireball}}, etc.)
+  - Dice rolls with various roll types
+  - Multiple abilities per section
+
+### Testing
+Manually tested with example file:
+```
+./character-tool -input testdata/example-character.md -output ./output -verbose
+```
+
+Verified output files:
+- `traits.txt` - Spell links converted correctly
+- `actions.txt` - Dice rolls with rollable tags and JSON metadata
+- `bonus-actions.txt` - Healing roll converted correctly
+- `reactions.txt` - Spell link converted correctly
+
+All conversions working as expected!
+
+### Next Steps
+- Add .gitignore for build artifacts
+- Finalize project documentation
