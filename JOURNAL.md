@@ -136,3 +136,37 @@ All 24 converter tests pass (14 dice + 10 spell).
 
 ### Next Steps
 - Implement formatter module to combine all conversions
+
+## [2026-02-17] Formatter Module Implementation
+
+### Tests Written
+- `TestFormatAbilities_EmptyList` - Tests empty input
+- `TestFormatAbilities_SingleAbility` - Tests single ability formatting
+- `TestFormatAbilities_MultipleAbilities` - Tests multiple abilities with blank line separation
+- `TestFormatAbilities_WithDiceRolls` - Tests dice roll integration
+- `TestFormatAbilities_WithSpellLinks` - Tests spell link integration
+- `TestFormatAbilities_WithInvalidSpell` - Tests warning collection for invalid spells
+- `TestFormatAbilities_WithDiceAndSpells` - Tests combining both conversions
+
+### Implementation
+- Created `formatter/formatter.go` with:
+  - `FormatAbilities()` - Main formatting function that orchestrates all conversions
+  - Converts spell links using converter.ConvertSpellLinks()
+  - Converts dice rolls using converter.ConvertDiceRolls()
+  - Formats as "Name. Description"
+  - Joins multiple abilities with blank lines
+  - Collects warnings from all conversions
+
+### Design Decisions
+- **Conversion order**: Apply spell links first, then dice rolls (order doesn't matter as they operate on different patterns)
+- **Action name**: Use ability name as the action name for dice rolls
+- **Warning aggregation**: Collect all warnings from both spell and dice conversions
+- **Formatting**: Simple "Name. Description" format, blank line between abilities
+- **Error handling**: Propagate errors from converters but continue processing
+
+### Test Results
+All 7 formatter tests pass.
+
+### Next Steps
+- Implement CLI with input/output handling
+- Create example test file in testdata/

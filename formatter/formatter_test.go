@@ -1,0 +1,214 @@
+package formatter
+
+import (
+	"character-tool/parser"
+	"strings"
+	"testing"
+)
+
+func TestFormatAbilities_EmptyList(t *testing.T) {
+	abilities := []parser.Ability{}
+	spells := make(map[string]bool)
+
+	result, warnings, err := FormatAbilities(abilities, spells)
+
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+
+	if result != "" {
+		t.Errorf("Expected empty string, got %s", result)
+	}
+
+	if len(warnings) != 0 {
+		t.Errorf("Expected no warnings, got %v", warnings)
+	}
+}
+
+func TestFormatAbilities_SingleAbility(t *testing.T) {
+	abilities := []parser.Ability{
+		{
+			Name:        "Darkvision",
+			Description: "You can see in dim light within 60 feet.",
+			Type:        parser.Trait,
+		},
+	}
+	spells := make(map[string]bool)
+
+	result, warnings, err := FormatAbilities(abilities, spells)
+
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+
+	expected := "Darkvision. You can see in dim light within 60 feet."
+	if result != expected {
+		t.Errorf("Expected:\n%s\nGot:\n%s", expected, result)
+	}
+
+	if len(warnings) != 0 {
+		t.Errorf("Expected no warnings, got %v", warnings)
+	}
+}
+
+func TestFormatAbilities_MultipleAbilities(t *testing.T) {
+	abilities := []parser.Ability{
+		{
+			Name:        "Darkvision",
+			Description: "You can see in dim light within 60 feet.",
+			Type:        parser.Trait,
+		},
+		{
+			Name:        "Pack Tactics",
+			Description: "You have advantage on attack rolls.",
+			Type:        parser.Trait,
+		},
+	}
+	spells := make(map[string]bool)
+
+	result, warnings, err := FormatAbilities(abilities, spells)
+
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+
+	// Should have both abilities separated by blank line
+	lines := strings.Split(result, "\n\n")
+	if len(lines) != 2 {
+		t.Errorf("Expected 2 abilities separated by blank lines, got %d: %v", len(lines), lines)
+	}
+
+	if len(warnings) != 0 {
+		t.Errorf("Expected no warnings, got %v", warnings)
+	}
+}
+
+func TestFormatAbilities_WithDiceRolls(t *testing.T) {
+	abilities := []parser.Ability{
+		{
+			Name:        "Quarterstaff",
+			Description: "Melee Weapon Attack: to hit: 1d20+2, reach 5 ft. Hit: damage: 1d6+2 bludgeoning.",
+			Type:        parser.Action,
+		},
+	}
+	spells := make(map[string]bool)
+
+	result, warnings, err := FormatAbilities(abilities, spells)
+
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+
+	// Should contain rollable tags
+	if !strings.Contains(result, "[rollable]") {
+		t.Error("Expected rollable tags in output")
+	}
+
+	if !strings.Contains(result, `"rollType":"to hit"`) {
+		t.Error("Expected to hit roll in output")
+	}
+
+	if !strings.Contains(result, `"rollType":"damage"`) {
+		t.Error("Expected damage roll in output")
+	}
+
+	if len(warnings) != 0 {
+		t.Errorf("Expected no warnings, got %v", warnings)
+	}
+}
+
+func TestFormatAbilities_WithSpellLinks(t *testing.T) {
+	abilities := []parser.Ability{
+		{
+			Name:        "Spellcasting",
+			Description: "You can cast {{spell:Fireball}} and {{spell:Shield}}.",
+			Type:        parser.Trait,
+		},
+	}
+	spells := map[string]bool{
+		"fireball": true,
+		"shield":   true,
+	}
+
+	result, warnings, err := FormatAbilities(abilities, spells)
+
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+
+	// Should contain spell tags
+	if !strings.Contains(result, "[spell]Fireball[/spell]") {
+		t.Error("Expected Fireball spell tag in output")
+	}
+
+	if !strings.Contains(result, "[spell]Shield[/spell]") {
+		t.Error("Expected Shield spell tag in output")
+	}
+
+	if len(warnings) != 0 {
+		t.Errorf("Expected no warnings for valid spells, got %v", warnings)
+	}
+}
+
+func TestFormatAbilities_WithInvalidSpell(t *testing.T) {
+	abilities := []parser.Ability{
+		{
+			Name:        "Spellcasting",
+			Description: "You can cast {{spell:NotASpell}}.",
+			Type:        parser.Trait,
+		},
+	}
+	spells := make(map[string]bool)
+
+	result, warnings, err := FormatAbilities(abilities, spells)
+
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+
+	// Should still convert spell
+	if !strings.Contains(result, "[spell]NotASpell[/spell]") {
+		t.Error("Expected NotASpell to be converted")
+	}
+
+	// Should have warning
+	if len(warnings) != 1 {
+		t.Fatalf("Expected 1 warning, got %d: %v", len(warnings), warnings)
+	}
+
+	if !strings.Contains(warnings[0], "NotASpell") {
+		t.Errorf("Expected warning about NotASpell, got %s", warnings[0])
+	}
+}
+
+func TestFormatAbilities_WithDiceAndSpells(t *testing.T) {
+	abilities := []parser.Ability{
+		{
+			Name:        "Magic Attack",
+			Description: "Cast {{spell:Fire Bolt}} for to hit: 1d20+5, dealing damage: 1d10 fire damage.",
+			Type:        parser.Action,
+		},
+	}
+	spells := map[string]bool{
+		"fire bolt": true,
+	}
+
+	result, warnings, err := FormatAbilities(abilities, spells)
+
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+
+	// Should have both spell links and rollable dice
+	if !strings.Contains(result, "[spell]Fire Bolt[/spell]") {
+		t.Error("Expected Fire Bolt spell tag")
+	}
+
+	if !strings.Contains(result, "[rollable]") {
+		t.Error("Expected rollable dice tags")
+	}
+
+	if len(warnings) != 0 {
+		t.Errorf("Expected no warnings, got %v", warnings)
+	}
+}
