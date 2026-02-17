@@ -37,8 +37,8 @@ func TestIsValidSpell(t *testing.T) {
 		{"Fireball", true},
 		{"Magic Missile", true},
 		{"Shield", true},
-		{"fireball", true},              // case insensitive
-		{"MAGIC MISSILE", true},         // case insensitive
+		{"fireball", true},      // case insensitive
+		{"MAGIC MISSILE", true}, // case insensitive
 		{"NotASpell", false},
 		{"Random Spell Name", false},
 		{"", false},

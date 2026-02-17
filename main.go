@@ -15,6 +15,7 @@ var (
 	inputFile string
 	outputDir string
 	verbose   bool
+	vaultMode bool
 )
 
 var rootCmd = &cobra.Command{
@@ -29,7 +30,7 @@ Reactions) and converts:
   - Dice notation (1d20+5) with keywords (to hit:, damage:) to rollable format
   - Validates spell names and dice notation`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return run(inputFile, outputDir, verbose)
+		return run(inputFile, outputDir, verbose, vaultMode)
 	},
 }
 
@@ -37,6 +38,7 @@ func init() {
 	rootCmd.Flags().StringVarP(&inputFile, "input", "i", "", "path to input markdown file (required)")
 	rootCmd.Flags().StringVarP(&outputDir, "output", "o", ".", "output directory for generated files")
 	rootCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "show detailed validation warnings")
+	rootCmd.Flags().BoolVar(&vaultMode, "vault-mode", false, "output files to same directory as input file (Obsidian integration)")
 	rootCmd.MarkFlagRequired("input")
 }
 
@@ -46,11 +48,16 @@ func main() {
 	}
 }
 
-func run(inputFile, outputDir string, verbose bool) error {
+func run(inputFile, outputDir string, verbose, vaultMode bool) error {
 	// Read input file
 	content, err := os.ReadFile(inputFile)
 	if err != nil {
 		return fmt.Errorf("failed to read input file: %w", err)
+	}
+
+	// In vault mode, output to the same directory as input file
+	if vaultMode {
+		outputDir = filepath.Dir(inputFile)
 	}
 
 	// Parse markdown
@@ -70,8 +77,10 @@ func run(inputFile, outputDir string, verbose bool) error {
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
-	// Track all warnings
+	// Track all warnings and created files
 	var allWarnings []string
+	var createdFiles []string
+	totalAbilities := 0
 
 	// Process and write each section
 	sections := map[string]struct {
@@ -85,6 +94,10 @@ func run(inputFile, outputDir string, verbose bool) error {
 	}
 
 	for sectionName, section := range sections {
+		if len(section.abilities) == 0 {
+			continue
+		}
+
 		formatted, warnings, err := formatter.FormatAbilities(section.abilities, spells)
 		if err != nil {
 			return fmt.Errorf("failed to format %s: %w", sectionName, err)
@@ -101,29 +114,30 @@ func run(inputFile, outputDir string, verbose bool) error {
 			return fmt.Errorf("failed to write %s: %w", section.filename, err)
 		}
 
-		// Report section status
-		if len(section.abilities) > 0 {
-			fmt.Printf("✓ %s: %d abilities written to %s\n", sectionName, len(section.abilities), section.filename)
-		} else {
-			fmt.Printf("- %s: empty (no file created)\n", sectionName)
-			// Remove empty file if it exists
-			os.Remove(outputPath)
-		}
+		// Track created files
+		createdFiles = append(createdFiles, fmt.Sprintf("%s (%d abilities)", outputPath, len(section.abilities)))
+		totalAbilities += len(section.abilities)
 	}
 
-	// Display warnings
+	// Display summary
+	fmt.Println("✓ Formatted character abilities")
+	fmt.Println("\nOutput files:")
+	for _, file := range createdFiles {
+		fmt.Printf("  - %s\n", file)
+	}
+
+	// Display warnings summary
 	if len(allWarnings) > 0 {
-		fmt.Println("\nWarnings:")
-		for _, warning := range allWarnings {
-			if verbose {
+		fmt.Println()
+		if verbose {
+			fmt.Println("Warnings:")
+			for _, warning := range allWarnings {
 				fmt.Printf("  ! %s\n", warning)
 			}
-		}
-		if !verbose {
-			fmt.Printf("  %d warning(s) found. Use --verbose flag for details.\n", len(allWarnings))
+		} else {
+			fmt.Printf("Warnings: %d found (use --verbose for details)\n", len(allWarnings))
 		}
 	}
 
-	fmt.Println("\nConversion complete!")
 	return nil
 }

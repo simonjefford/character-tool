@@ -1,0 +1,28 @@
+{
+  "shell_commands": [
+    {
+      "command": "/path/to/character-tool --input \"{{file_path:absolute}}\" --vault-mode",
+      "alias": "Format D&D Character",
+      "confirm_execution": false,
+      "ignore_error_codes": false,
+      "output_channels": {
+        "stdout": "notification",
+        "stderr": "notification"
+      },
+      "platform": "default",
+      "shell": ""
+    },
+    {
+      "command": "/path/to/character-tool --input \"{{file_path:absolute}}\" --vault-mode --verbose",
+      "alias": "Format D&D Character (verbose)",
+      "confirm_execution": false,
+      "ignore_error_codes": false,
+      "output_channels": {
+        "stdout": "notification",
+        "stderr": "notification"
+      },
+      "platform": "default",
+      "shell": ""
+    }
+  ]
+}

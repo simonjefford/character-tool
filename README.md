@@ -32,6 +32,7 @@ Or using short flags:
 
 - `-i, --input`: Path to input markdown file (required)
 - `-o, --output`: Output directory for generated files (default: current directory)
+- `--vault-mode`: Output files to same directory as input file (useful for Obsidian)
 - `-v, --verbose`: Show detailed validation warnings
 - `-h, --help`: Show help message
 
@@ -87,6 +88,26 @@ The tool generates four files:
 - `reactions.txt` - Reactions
 
 Each file contains D&D Beyond-formatted text ready to paste into character sheets.
+
+## Obsidian Integration
+
+You can use character-tool directly from Obsidian using the Shell Commands community plugin. This allows you to format character files with a single command or keyboard shortcut.
+
+### Quick Start
+
+1. Install the [Shell Commands](https://github.com/Taitava/obsidian-shellcommands) plugin in Obsidian
+2. Add a new command:
+   ```bash
+   /path/to/character-tool --input "{{file_path:absolute}}" --vault-mode
+   ```
+3. Set a keyboard shortcut (optional)
+4. Run the command on any character markdown file
+
+The formatted `.txt` files will appear in the same directory as your character file.
+
+### Full Setup Guide
+
+See [docs/OBSIDIAN_INTEGRATION.md](docs/OBSIDIAN_INTEGRATION.md) for detailed installation instructions, configuration options, and troubleshooting.
 
 ## Example Output
 

@@ -36,7 +36,7 @@ func TestParseDiceNotation_Invalid(t *testing.T) {
 		"abc",
 		"1d",
 		"d",
-		"1d3", // d3 not valid
+		"1d3",    // d3 not valid
 		"1d100+", // incomplete modifier
 	}
 

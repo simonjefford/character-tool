@@ -268,3 +268,123 @@ All requirements from the plan have been implemented and tested.
 - Verified all output files generated correctly
 
 All functionality preserved with improved CLI experience.
+
+## [2026-02-17] Obsidian Integration
+
+### Changes Made
+- Added `--vault-mode` flag to CLI for Obsidian workflow
+- Enhanced CLI output formatting for better readability
+- Created comprehensive Obsidian integration documentation
+- Added example Shell Commands plugin configuration
+- Updated README with Obsidian integration section
+
+### Implementation
+
+#### CLI Enhancements (main.go)
+**`--vault-mode` Flag:**
+- Added new boolean flag that defaults output directory to input file's directory
+- Simplifies Obsidian configuration by eliminating need to specify output path
+- When enabled: `outputDir = filepath.Dir(inputFile)`
+- Works seamlessly with Shell Commands plugin's `{{file_path:absolute}}` variable
+
+**Output Formatting Improvements:**
+- Changed from per-section status to summary format
+- Shows success message: "✓ Formatted character abilities"
+- Lists all created files with ability counts: `- path/file.txt (N abilities)`
+- Improved warnings summary: Shows count in non-verbose mode
+- Removed "Conversion complete!" trailing message for cleaner output
+- Skips empty sections entirely (no status message, no file creation)
+
+#### Documentation (docs/)
+**OBSIDIAN_INTEGRATION.md:**
+- Comprehensive setup guide covering prerequisites through troubleshooting
+- Step-by-step Shell Commands plugin installation
+- Configuration examples for basic and verbose modes
+- Keyboard shortcut setup instructions
+- Example workflow and file organization suggestions
+- Troubleshooting section for common issues
+- Links to additional resources
+
+**shell-commands-config.json:**
+- Ready-to-import Shell Commands configuration
+- Two pre-configured commands:
+  1. Standard format with `--vault-mode`
+  2. Verbose format with `--vault-mode --verbose`
+- Configured to show output in Obsidian notifications
+- Uses `{{file_path:absolute}}` template variable
+
+**README.md Updates:**
+- Added `--vault-mode` flag to flags section
+- New "Obsidian Integration" section with quick start
+- Links to detailed integration guide
+- Example command for Shell Commands plugin
+
+### Design Decisions
+
+**vault-mode Implementation:**
+- Simple flag-based approach rather than detecting Obsidian environment
+- Works anywhere, not just in Obsidian (useful for general same-directory output)
+- No special handling of `{{vault}}` variable (Shell Commands resolves this)
+- Clean separation: output logic doesn't need Obsidian awareness
+
+**Output Format:**
+- Summary-first approach better suited for Obsidian's notification system
+- File paths shown with full absolute paths (Obsidian auto-links local files)
+- Ability counts help users verify completeness at a glance
+- Warnings shown as count unless verbose mode enabled
+
+**Documentation Structure:**
+- Separate detailed guide keeps README focused
+- Example configuration file allows copy-paste setup
+- Troubleshooting section addresses common path and permission issues
+- Multiple command examples show verbose and custom output options
+
+### Testing
+Manual testing performed:
+```bash
+# Build tool
+go build
+
+# Test vault-mode flag
+./character-tool --input testdata/example-character.md --vault-mode
+
+# Verify output location
+ls testdata/*.txt
+
+# Test new output format
+✓ Formatted character abilities
+
+Output files:
+  - testdata/traits.txt (2 abilities)
+  - testdata/actions.txt (2 abilities)
+  - testdata/bonus-actions.txt (1 abilities)
+  - testdata/reactions.txt (1 abilities)
+```
+
+All tests successful:
+- Files created in same directory as input
+- Output format clean and informative
+- Verbose mode shows warnings when present
+- Empty sections handled correctly
+
+### Benefits for Obsidian Users
+1. **Simple Setup**: One-time Shell Commands configuration
+2. **Fast Workflow**: Format with keyboard shortcut or command palette
+3. **No Path Configuration**: vault-mode eliminates output directory complexity
+4. **Clear Feedback**: Summary shows exactly what was created
+5. **Vault Integration**: Output files appear immediately in same folder
+6. **Copy-Ready**: Formatted text ready to paste into D&D Beyond
+
+### Files Modified
+- `main.go` - Added vaultMode flag, updated run() signature, improved output
+- `README.md` - Added flag documentation and Obsidian section
+- `JOURNAL.md` - This entry
+
+### Files Created
+- `docs/OBSIDIAN_INTEGRATION.md` - Complete setup guide
+- `docs/shell-commands-config.json` - Example configuration
+
+### Next Steps
+- Consider adding auto-watch mode in future (re-format on save)
+- Potential MCP server integration for AI agent access
+- Template support for different character types
