@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go mod init:*)",
+      "Bash(go test:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\ndocs: initialize project documentation and structure\n\n- Add PLAN.md with implementation plan\n- Add JOURNAL.md for development tracking\n- Add CLAUDE.md with development rules \\(TDD, conventional commits\\)\n- Add README.md with usage instructions\n- Initialize Go module\n\nCo-Authored-By: Claude \\(arn:aws:bedrock:us-east-1:975050383151:application-inference-profile/r9ned1o96wid\\) <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: implement markdown parser module\n\n- Add ParseMarkdown\\(\\) to extract character abilities from markdown\n- Parse sections: Traits, Actions, Bonus Actions, Reactions\n- Extract abilities using **Name.** Description pattern\n- Split by ## headers and paragraph breaks\n- Preserve text formatting \\(italic, bold\\)\n- Ignore unknown sections\n- Handle empty sections gracefully\n\nTests:\n- TestParseMarkdown_EmptyInput\n- TestParseMarkdown_SingleTrait\n- TestParseMarkdown_MultipleSections\n- TestParseMarkdown_MultipleAbilitiesInSection\n- TestParseMarkdown_PreservesFormatting\n- TestParseMarkdown_IgnoresUnknownSections\n- TestParseMarkdown_HandlesEmptySections\n\nAll 7 tests pass.\n\nCo-Authored-By: Claude \\(arn:aws:bedrock:us-east-1:975050383151:application-inference-profile/r9ned1o96wid\\) <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: implement dice roll converter\n\n- Add ParseDiceNotation\\(\\) to validate and normalize dice notation\n- Add ConvertDiceRolls\\(\\) to convert text with roll keywords\n- Support roll types: to hit, damage, healing, save\n- Generate D&D Beyond rollable format with JSON metadata\n- Validate dice types \\(d4, d6, d8, d10, d12, d20, d100\\)\n- Extract and display modifiers \\(+X, -X\\)\n- Handle multiple rolls in single text\n\nFormat: [rollable]MODIFIER;JSON[/rollable]\n\nTests:\n- TestParseDiceNotation_Valid \\(6 cases\\)\n- TestParseDiceNotation_Invalid \\(5 cases\\)\n- TestConvertDiceRolls_Simple\n- TestConvertDiceRolls_Damage\n- TestConvertDiceRolls_NoModifier\n- TestConvertDiceRolls_MultipleRolls\n- TestConvertDiceRolls_Healing\n- TestConvertDiceRolls_SaveDC\n- TestConvertDiceRolls_NoRolls\n- TestExtractModifier_* \\(3 cases\\)\n\nAll 14 tests pass.\n\nCo-Authored-By: Claude \\(arn:aws:bedrock:us-east-1:975050383151:application-inference-profile/r9ned1o96wid\\) <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nchore: add D&D 5e spell list data\n\nAdd JSON file with 348 standard D&D 5e spells for validation.\nIncludes all Player''s Handbook spells from cantrips to 9th level.\n\nCo-Authored-By: Claude \\(arn:aws:bedrock:us-east-1:975050383151:application-inference-profile/r9ned1o96wid\\) <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: implement spell linker module\n\n- Add LoadSpells\\(\\) to load D&D 5e spell list from JSON\n- Add IsValidSpell\\(\\) for case-insensitive spell validation\n- Add ConvertSpellLinks\\(\\) to convert {{spell:Name}} to [spell]Name[/spell]\n- Return warnings for unknown spells\n- Preserve original case in output\n- Support multiple spells in one text\n\nTests:\n- TestLoadSpells\n- TestIsValidSpell \\(8 cases - valid, invalid, case-insensitive\\)\n- TestConvertSpellLinks_Single\n- TestConvertSpellLinks_Multiple\n- TestConvertSpellLinks_InvalidSpell\n- TestConvertSpellLinks_MixedValidInvalid\n- TestConvertSpellLinks_CaseInsensitive\n- TestConvertSpellLinks_NoSpells\n- TestConvertSpellLinks_EmptySpellName\n\nAll 24 tests pass \\(14 dice + 10 spell\\).\n\nCo-Authored-By: Claude \\(arn:aws:bedrock:us-east-1:975050383151:application-inference-profile/r9ned1o96wid\\) <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: implement formatter module\n\n- Add FormatAbilities\\(\\) to combine parsing and conversion\n- Integrate spell link conversion\n- Integrate dice roll conversion  \n- Format abilities as \"Name. Description\"\n- Separate multiple abilities with blank lines\n- Collect and return all warnings from conversions\n- Use ability name as action name for dice rolls\n\nTests:\n- TestFormatAbilities_EmptyList\n- TestFormatAbilities_SingleAbility\n- TestFormatAbilities_MultipleAbilities\n- TestFormatAbilities_WithDiceRolls\n- TestFormatAbilities_WithSpellLinks\n- TestFormatAbilities_WithInvalidSpell\n- TestFormatAbilities_WithDiceAndSpells\n\nAll 7 tests pass.\n\nCo-Authored-By: Claude \\(arn:aws:bedrock:us-east-1:975050383151:application-inference-profile/r9ned1o96wid\\) <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(go build:*)",
+      "Bash(./character-tool:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: implement CLI and add example test file\n\n- Add main.go with CLI implementation\n- Support -input, -output, -verbose flags\n- Process all four sections \\(Traits, Actions, Bonus Actions, Reactions\\)\n- Write separate output files for each section\n- Collect and display warnings with verbose option\n- Create output directory if needed\n- Skip empty sections\n\nExample file:\n- Add testdata/example-character.md with all section types\n- Includes spell links and dice rolls for testing\n\nUsage:\n  ./character-tool -input file.md -output ./output -verbose\n\nOutput verified with example file - all conversions working correctly.\n\nCo-Authored-By: Claude \\(arn:aws:bedrock:us-east-1:975050383151:application-inference-profile/r9ned1o96wid\\) <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nchore: add .gitignore\n\nIgnore binary, output files, IDE files, and OS files.\n\nCo-Authored-By: Claude \\(arn:aws:bedrock:us-east-1:975050383151:application-inference-profile/r9ned1o96wid\\) <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit:*)",
+      "Bash(tree:*)",
+      "Bash(git rebase:*)",
+      "Bash(git reset:*)",
+      "Bash(for commit in 6bba0c6 3864a2a 3a602ab 0ef6be5 8c4a755)",
+      "Bash(do echo \"=== $commit ===\")",
+      "Bash(done)",
+      "Bash(GIT_SEQUENCE_EDITOR=\"cp /tmp/rebase-plan.txt\" git rebase:*)",
+      "Bash(GIT_SEQUENCE_EDITOR=\"cp /tmp/rebase-root-plan.txt\" git rebase -i --root)",
+      "Bash(git checkout:*)",
+      "Bash(GIT_SEQUENCE_EDITOR=\"cp /tmp/fix-spell-rebase.txt\" git rebase -i --root)",
+      "Bash(GIT_SEQUENCE_EDITOR=\"cp /tmp/fix-formatter-rebase.txt\" git rebase -i --root)",
+      "Bash(go get:*)"
+    ]
+  }
+}

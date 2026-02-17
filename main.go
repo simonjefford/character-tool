@@ -4,30 +4,44 @@ import (
 	"character-tool/converter"
 	"character-tool/formatter"
 	"character-tool/parser"
-	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/spf13/cobra"
 )
 
+var (
+	inputFile string
+	outputDir string
+	verbose   bool
+)
+
+var rootCmd = &cobra.Command{
+	Use:   "character-tool",
+	Short: "Convert D&D character markdown to D&D Beyond format",
+	Long: `A tool that converts markdown character descriptions into D&D Beyond-formatted
+blocks with spell links and rollable dice notation.
+
+The tool parses markdown files with structured headers (Traits, Actions, Bonus Actions,
+Reactions) and converts:
+  - {{spell:SpellName}} syntax to clickable spell links
+  - Dice notation (1d20+5) with keywords (to hit:, damage:) to rollable format
+  - Validates spell names and dice notation`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return run(inputFile, outputDir, verbose)
+	},
+}
+
+func init() {
+	rootCmd.Flags().StringVarP(&inputFile, "input", "i", "", "path to input markdown file (required)")
+	rootCmd.Flags().StringVarP(&outputDir, "output", "o", ".", "output directory for generated files")
+	rootCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "show detailed validation warnings")
+	rootCmd.MarkFlagRequired("input")
+}
+
 func main() {
-	// Define flags
-	inputFile := flag.String("input", "", "Path to input markdown file (required)")
-	outputDir := flag.String("output", ".", "Output directory for generated files (default: current directory)")
-	verbose := flag.Bool("verbose", false, "Show detailed validation warnings")
-
-	flag.Parse()
-
-	// Validate input flag
-	if *inputFile == "" {
-		fmt.Fprintln(os.Stderr, "Error: -input flag is required")
-		flag.Usage()
-		os.Exit(1)
-	}
-
-	// Run the tool
-	if err := run(*inputFile, *outputDir, *verbose); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }
@@ -106,7 +120,7 @@ func run(inputFile, outputDir string, verbose bool) error {
 			}
 		}
 		if !verbose {
-			fmt.Printf("  %d warning(s) found. Use -verbose flag for details.\n", len(allWarnings))
+			fmt.Printf("  %d warning(s) found. Use --verbose flag for details.\n", len(allWarnings))
 		}
 	}
 

@@ -19,14 +19,21 @@ go build -o character-tool
 ## Usage
 
 ```bash
-./character-tool -input character.md -output ./output
+./character-tool --input character.md --output ./output
+```
+
+Or using short flags:
+
+```bash
+./character-tool -i character.md -o ./output
 ```
 
 ### Flags
 
-- `-input`: Path to input markdown file (required)
-- `-output`: Output directory for generated files (default: current directory)
-- `-verbose`: Show detailed validation warnings
+- `-i, --input`: Path to input markdown file (required)
+- `-o, --output`: Output directory for generated files (default: current directory)
+- `-v, --verbose`: Show detailed validation warnings
+- `-h, --help`: Show help message
 
 ## Input Format
 

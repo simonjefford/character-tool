@@ -239,3 +239,32 @@ The tool successfully:
 - Provides warning system for validation issues
 
 All requirements from the plan have been implemented and tested.
+
+## [2026-02-17] Refactor CLI to Use Cobra
+
+### Changes Made
+- Replaced stdlib `flag` package with `github.com/spf13/cobra`
+- Added cobra and pflag dependencies to go.mod
+- Restructured CLI with cobra command structure
+
+### Implementation
+- Created `rootCmd` with descriptive help text
+- Added short flags: `-i` (input), `-o` (output), `-v` (verbose)
+- Added long flags: `--input`, `--output`, `--verbose`, `--help`
+- Improved help output with detailed description
+- Maintained all existing functionality
+
+### Benefits
+- Better help output with automatic formatting
+- Support for both short and long flags
+- Built-in flag validation
+- More extensible for future subcommands
+- Industry-standard CLI framework
+
+### Testing
+- Verified `--help` output shows full documentation
+- Tested with `-i` and `--input` flags (both work)
+- Confirmed required flag validation
+- Verified all output files generated correctly
+
+All functionality preserved with improved CLI experience.
