@@ -98,3 +98,41 @@ All 14 tests pass successfully.
 ### Next Steps
 - Add D&D 5e spell list data
 - Implement spell linker module with TDD
+
+## [2026-02-17] Spell Linker Implementation
+
+### Tests Written
+- `TestLoadSpells` - Verifies spell list loads from JSON file
+- `TestIsValidSpell` - Tests case-insensitive spell validation (8 cases)
+- `TestConvertSpellLinks_Single` - Tests single spell conversion
+- `TestConvertSpellLinks_Multiple` - Tests multiple spells in one text
+- `TestConvertSpellLinks_InvalidSpell` - Tests warning for unknown spells
+- `TestConvertSpellLinks_MixedValidInvalid` - Tests mix of valid and invalid spells
+- `TestConvertSpellLinks_CaseInsensitive` - Tests case-insensitive matching
+- `TestConvertSpellLinks_NoSpells` - Tests text without spell references
+- `TestConvertSpellLinks_EmptySpellName` - Tests empty spell name handling
+
+### Implementation
+- Created `converter/spell.go` with:
+  - `LoadSpells()` - Loads spell list from data/spells.json using runtime.Caller for path resolution
+  - `IsValidSpell()` - Case-insensitive spell name validation
+  - `ConvertSpellLinks()` - Converts {{spell:Name}} to [spell]Name[/spell] format
+  - Returns warnings for unknown spells while still converting them
+
+### Design Decisions
+- **File loading**: Used `runtime.Caller(0)` to get source file location and navigate to data directory
+- **Case-insensitive map**: Store all spell names as lowercase keys for O(1) lookup
+- **Preserve original case**: Output uses the original case from input, not the canonical spell name
+- **Regex pattern**: `\{\{spell:([^}]*)\}\}` to match spell syntax
+- **Warning system**: Return list of warnings for invalid spells rather than failing
+- **Empty names**: Warn about empty spell names but still convert
+
+### Issues Encountered
+- **Embed path issue**: Cannot use `//go:embed ../data/spells.json` with relative parent paths
+- **Solution**: Use `runtime.Caller()` to dynamically resolve path to data directory
+
+### Test Results
+All 24 converter tests pass (14 dice + 10 spell).
+
+### Next Steps
+- Implement formatter module to combine all conversions
