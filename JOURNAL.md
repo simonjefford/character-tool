@@ -61,3 +61,40 @@ All 7 tests pass successfully.
 
 ### Next Steps
 - Implement dice roll converter module with TDD
+
+## [2026-02-17] Dice Roll Converter Implementation
+
+### Tests Written
+- `TestParseDiceNotation_Valid` - Tests valid dice notation parsing (1d20, 2d6+5, d20, etc.)
+- `TestParseDiceNotation_Invalid` - Tests rejection of invalid notation (d3, incomplete, etc.)
+- `TestConvertDiceRolls_Simple` - Tests basic "to hit: 1d20+5" conversion
+- `TestConvertDiceRolls_Damage` - Tests damage roll conversion
+- `TestConvertDiceRolls_NoModifier` - Tests rolls without modifiers (1d10)
+- `TestConvertDiceRolls_MultipleRolls` - Tests text with multiple roll types
+- `TestConvertDiceRolls_Healing` - Tests healing roll type
+- `TestConvertDiceRolls_SaveDC` - Tests that DC values don't create rollables
+- `TestConvertDiceRolls_NoRolls` - Tests text without any rolls
+- `TestExtractModifier_*` - Tests modifier extraction (+5, -2, none)
+
+### Implementation
+- Created `converter/dice.go` with:
+  - `ParseDiceNotation()` - Validates and normalizes dice notation
+  - `ConvertDiceRolls()` - Main conversion function for text with roll keywords
+  - `extractModifier()` - Helper to extract +X or -X modifiers
+  - `RollableData` struct - JSON structure for rollable metadata
+  - `validDice` map - Validates only d4, d6, d8, d10, d12, d20, d100
+
+### Design Decisions
+- **Regex pattern**: `(to hit|damage|healing|save):\s*(\d*d\d+[+-]?\d*)` to match roll keywords
+- **Rollable format**: `[rollable]MODIFIER;JSON[/rollable]` where modifier is displayed and JSON contains full data
+- **Validation**: Strictly validate dice types against D&D 5e standard dice
+- **Normalization**: Convert implicit "d20" to "1d20" for consistency
+- **DC handling**: Don't convert DC values to rollables (they're static numbers)
+- **Error handling**: Return original text if dice notation is invalid
+
+### Test Results
+All 14 tests pass successfully.
+
+### Next Steps
+- Add D&D 5e spell list data
+- Implement spell linker module with TDD
