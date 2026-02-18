@@ -178,3 +178,31 @@ func TestParseMarkdown_HandlesEmptySections(t *testing.T) {
 		t.Errorf("Expected 1 action, got %d", len(result.Actions))
 	}
 }
+
+func TestParseMarkdown_PeriodPlacement(t *testing.T) {
+	input := `## Bonus Actions
+
+**Second Wind.** Regain healing: 1d10+5 hit points.
+
+**Fireball**. Kill all the things: 20d20 hit points.`
+
+	result, err := ParseMarkdown(input)
+
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+
+	if len(result.BonusActions) != 2 {
+		t.Fatalf("Expected 2 bonus actions, got %d", len(result.BonusActions))
+	}
+
+	// Test period inside bold markers
+	if result.BonusActions[0].Name != "Second Wind" {
+		t.Errorf("Expected name 'Second Wind', got '%s'", result.BonusActions[0].Name)
+	}
+
+	// Test period outside bold markers
+	if result.BonusActions[1].Name != "Fireball" {
+		t.Errorf("Expected name 'Fireball', got '%s'", result.BonusActions[1].Name)
+	}
+}

@@ -145,8 +145,9 @@ func parseAbilities(content string, abilityType AbilityType) []Ability {
 			continue
 		}
 
-		// Match **Name.** Description pattern
-		abilityRegex := regexp.MustCompile(`^\*\*([^*]+)\.\*\*\s*(.+)$`)
+		// Match **Name.** Description or **Name**. Description pattern
+		// Supports period inside or outside bold markers
+		abilityRegex := regexp.MustCompile(`^\*\*([^*]+?)\.?\*\*\.?\s*(.+)$`)
 		match := abilityRegex.FindStringSubmatch(paragraph)
 
 		if len(match) >= 3 {

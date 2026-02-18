@@ -388,3 +388,62 @@ All tests successful:
 - Consider adding auto-watch mode in future (re-format on save)
 - Potential MCP server integration for AI agent access
 - Template support for different character types
+
+## [2026-02-18] Fix Parser Regex for Period Placement
+
+### Issue
+Parser only captured abilities with period inside bold markers (**Name.**) but failed to match period outside bold markers (**Name**.). This caused abilities to be silently skipped during parsing.
+
+Example that failed:
+```markdown
+## Bonus Actions
+
+**Second Wind.** Regain healing: 1d10+5 hit points.
+
+**Fireball**. Kill all the things: 20d20 hit points.
+```
+
+Only "Second Wind" was parsed, "Fireball" was silently ignored.
+
+### Tests Written
+- `TestParseMarkdown_PeriodPlacement` - Tests both period placement styles (inside and outside bold markers)
+
+### Implementation
+Updated regex in `parser/parser.go`:
+- **Old regex**: `^\*\*([^*]+)\.\*\*\s*(.+)$` (required period inside bold)
+- **New regex**: `^\*\*([^*]+?)\.?\*\*\.?\s*(.+)$` (supports period inside or outside)
+
+The new regex:
+- `[^*]+?` - Non-greedy match for name (allows optional period after)
+- `\.?` - Optional period inside bold markers
+- `\*\*` - Closing bold markers
+- `\.?` - Optional period outside bold markers
+- Result: Matches both `**Name.**` and `**Name**.` patterns
+
+### Testing
+All existing tests pass, new test confirms both formats work:
+```bash
+go test ./parser -v
+# All 8 tests PASS including new TestParseMarkdown_PeriodPlacement
+```
+
+Manual verification:
+```bash
+./character-tool --input test_input.md --output .
+# Output: bonus-actions.txt (2 abilities)
+# Previously: bonus-actions.txt (1 abilities)
+```
+
+### Design Decisions
+- Made regex more permissive rather than enforcing single format
+- Non-breaking change: existing markdown still works
+- Better user experience: accepts both common bold+period styles
+- No performance impact: regex still efficient with non-greedy matching
+
+### Files Modified
+- `parser/parser.go` - Updated ability regex pattern and comment
+- `parser/parser_test.go` - Added TestParseMarkdown_PeriodPlacement test
+- `JOURNAL.md` - This entry
+
+### Root Cause
+Original regex was too strict, assuming only one period placement style. Real-world markdown often mixes styles or uses period outside bold for aesthetic reasons.
