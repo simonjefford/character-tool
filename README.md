@@ -68,15 +68,23 @@ Use `{{spell:SpellName}}` syntax to create spell links. The tool validates again
 
 ### Dice Rolls
 
-Use inline dice notation with keyword prefixes:
+Dice notation must be preceded by one of the following keywords to be converted to rollable format:
 
 - `to hit: 1d20+5` - Attack rolls
 - `damage: 2d6+3` - Damage rolls
 - `healing: 1d8+4` - Healing rolls
-- `DC 15` - Saving throw DCs
 - `save: 1d20+2` - Saving throw rolls
 
-Supported dice: d4, d6, d8, d10, d12, d20, d100
+**Important**: Only dice notation with these specific keywords will be made rollable. Other text with dice notation (like `things: 20d20`) will remain as plain text.
+
+Examples:
+```markdown
+**Good**: Regain healing: 1d10+5 hit points.
+**Bad**: Regain 1d10+5 hit points. (no keyword)
+**Bad**: Regain things: 1d10+5 hit points. (wrong keyword)
+```
+
+Supported dice types: d4, d6, d8, d10, d12, d20, d100
 
 ## Output
 

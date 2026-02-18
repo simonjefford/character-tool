@@ -197,6 +197,13 @@ You can add `*.txt` to your `.gitignore` or Obsidian's excluded files if you don
 - The flag outputs to the same directory as the input file
 - Without the flag, output goes to current working directory
 
+### Dice rolls not becoming rollable
+- Dice notation must be preceded by a keyword: `to hit:`, `damage:`, `healing:`, or `save:`
+- Example (works): `Regain healing: 1d10+5 hit points.`
+- Example (doesn't work): `Regain 1d10+5 hit points.` (missing keyword)
+- Example (doesn't work): `Deal things: 1d10+5 damage.` (invalid keyword)
+- Only d4, d6, d8, d10, d12, d20, d100 dice types are supported
+
 ## Advanced Configuration
 
 ### Multiple Commands

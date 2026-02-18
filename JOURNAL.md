@@ -447,3 +447,50 @@ Manual verification:
 
 ### Root Cause
 Original regex was too strict, assuming only one period placement style. Real-world markdown often mixes styles or uses period outside bold for aesthetic reasons.
+
+## [2026-02-18] Document Dice Roll Keyword Requirements
+
+### Issue
+User reported dice notation not being converted to rollable format. Investigation revealed the text `things: 20d20` was not being converted because "things" is not a valid roll type keyword.
+
+The dice converter only recognizes specific keywords:
+- `to hit:` - Attack rolls
+- `damage:` - Damage rolls
+- `healing:` - Healing rolls
+- `save:` - Saving throw rolls
+
+Any other text followed by dice notation (like `things: 20d20`) remains as plain text.
+
+### Changes Made
+Updated documentation to clearly explain keyword requirements:
+
+**README.md:**
+- Expanded "Dice Rolls" section with keyword requirement
+- Added "Important" callout explaining only specific keywords work
+- Provided good/bad examples showing correct and incorrect usage
+- Clarified that other text patterns won't be converted
+
+**docs/OBSIDIAN_INTEGRATION.md:**
+- Added troubleshooting section "Dice rolls not becoming rollable"
+- Provided examples of working vs non-working patterns
+- Listed valid keywords and supported dice types
+
+### Design Decision
+Chose to document behavior rather than expand keyword matching because:
+1. **Specificity**: D&D Beyond expects specific roll types (to hit, damage, healing, save)
+2. **Data Quality**: Precise keywords ensure correct rollType metadata in JSON
+3. **User Control**: Users specify intent explicitly rather than tool guessing
+4. **D&D Semantics**: Keywords map directly to D&D game mechanics
+5. **No Breaking Changes**: Expanding keywords could cause unexpected conversions
+
+### Files Modified
+- `README.md` - Enhanced dice rolls section with examples
+- `docs/OBSIDIAN_INTEGRATION.md` - Added troubleshooting entry
+- `JOURNAL.md` - This entry
+
+### User Education
+Documentation now makes clear:
+- Keywords are required, not optional
+- Only four specific keywords are supported
+- Provides correct usage patterns
+- Shows common mistakes to avoid
