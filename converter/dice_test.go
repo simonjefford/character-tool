@@ -76,7 +76,7 @@ func TestConvertDiceRolls_Damage(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	expected := `[rollable]2d6+3;{"diceNotation":"2d6+3","rollType":"damage","rollAction":"Greatsword"}[/rollable]`
+	expected := `[rollable](2d6+3);{"diceNotation":"2d6+3","rollType":"damage","rollAction":"Greatsword"}[/rollable]`
 	if result != expected {
 		t.Errorf("Expected:\n%s\nGot:\n%s", expected, result)
 	}
@@ -92,8 +92,8 @@ func TestConvertDiceRolls_NoModifier(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	// Non-d20 should show full notation
-	expected := `[rollable]1d10;{"diceNotation":"1d10","rollType":"damage","rollAction":"Fire Bolt"}[/rollable]`
+	// Non-d20 should show full notation in parentheses
+	expected := `[rollable](1d10);{"diceNotation":"1d10","rollType":"damage","rollAction":"Fire Bolt"}[/rollable]`
 	if result != expected {
 		t.Errorf("Expected:\n%s\nGot:\n%s", expected, result)
 	}
@@ -214,12 +214,12 @@ func TestGetDisplayValue_NonD20Rolls(t *testing.T) {
 		notation string
 		expected string
 	}{
-		{"1d10+5", "1d10+5"},
-		{"2d6+3", "2d6+3"},
-		{"1d8", "1d8"},
-		{"1d4-1", "1d4-1"},
-		{"3d6", "3d6"},
-		{"1d12+4", "1d12+4"},
+		{"1d10+5", "(1d10+5)"},
+		{"2d6+3", "(2d6+3)"},
+		{"1d8", "(1d8)"},
+		{"1d4-1", "(1d4-1)"},
+		{"3d6", "(3d6)"},
+		{"1d12+4", "(1d12+4)"},
 	}
 
 	for _, tt := range tests {
@@ -249,19 +249,19 @@ func TestConvertDiceRolls_VariousDiceTypes(t *testing.T) {
 			name:         "D8 damage roll",
 			input:        "damage: 1d8+3",
 			actionName:   "Longsword",
-			expectedDisp: "1d8+3",
+			expectedDisp: "(1d8+3)",
 		},
 		{
 			name:         "D6 damage roll",
 			input:        "damage: 2d6+2",
 			actionName:   "Greatsword",
-			expectedDisp: "2d6+2",
+			expectedDisp: "(2d6+2)",
 		},
 		{
 			name:         "D10 damage no modifier",
 			input:        "damage: 1d10",
 			actionName:   "Fire Bolt",
-			expectedDisp: "1d10",
+			expectedDisp: "(1d10)",
 		},
 	}
 

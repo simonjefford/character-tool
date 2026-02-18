@@ -126,10 +126,10 @@ func isD20Roll(notation string) bool {
 
 // getDisplayValue returns the display value for a rollable tag.
 // For d20 rolls: returns only the modifier (e.g., "+5" or "")
-// For non-d20 rolls: returns full dice notation (e.g., "1d8+5")
+// For non-d20 rolls: returns notation in parentheses (e.g., "(1d8+5)")
 func getDisplayValue(notation string) string {
 	if isD20Roll(notation) {
 		return extractModifier(notation)
 	}
-	return notation
+	return "(" + notation + ")"
 }

@@ -1,5 +1,52 @@
 # Development Journal
 
+## [2026-02-18] Format Non-d20 Rolls with Parentheses
+
+### Description
+Updated non-d20 roll display format to wrap dice notation in parentheses. For example: `[rollable](1d8+3);...` instead of `[rollable]1d8+3;...`.
+
+### Changes
+Modified `converter/dice.go`:
+
+**Updated `getDisplayValue()` function**:
+- For non-d20 rolls, simply wraps notation in parentheses: `"(" + notation + ")"`
+- Removed unnecessary `formatNonD20Display()` helper function
+- Examples: "1d8+5" → "(1d8+5)", "2d6-1" → "(2d6-1)", "1d10" → "(1d10)"
+
+### Tests Updated
+Updated all tests to expect new format:
+
+1. **`converter/dice_test.go`:**
+   - `TestGetDisplayValue_NonD20Rolls` - Updated expectations for all 6 test cases
+   - `TestConvertDiceRolls_VariousDiceTypes` - Updated damage roll expectations
+   - `TestConvertDiceRolls_Damage` - Updated to expect "(2d6+3)"
+   - `TestConvertDiceRolls_NoModifier` - Updated to expect "(1d10)"
+
+2. **`formatter/formatter_test.go`:**
+   - `TestFormatAbilities_D20VsDamageDisplay` - Updated to check for "(1d8+3)" and "(1d4+3)"
+
+### Design Decisions
+- **Parentheses**: Makes it visually clear this is a complete dice expression
+- **No spaces**: Keeps notation compact while still being readable
+- **Simple implementation**: Just wraps the existing notation string
+- **d20 rolls unchanged**: Still show modifier only ("+5") for consistency with existing behavior
+
+### Test Results
+All tests pass:
+- `go test ./...` - All tests passing
+- `go vet ./...` - No issues
+- `gofmt -w .` - Code formatted
+
+### Manual Verification
+Tested with sample markdown:
+- d20 to hit: `[rollable]+5;...` ✓
+- d8 damage: `[rollable](1d8+3);...` ✓
+- d4 damage: `[rollable](1d4+3);...` ✓
+- d10 no modifier: `[rollable](1d10);...` ✓
+
+### Issues Encountered
+None - straightforward implementation.
+
 ## [2026-02-18] Update Clipboard Script to Use Compiled Binary
 
 ### Description

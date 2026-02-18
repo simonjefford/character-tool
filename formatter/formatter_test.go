@@ -242,12 +242,12 @@ func TestFormatAbilities_D20VsDamageDisplay(t *testing.T) {
 		t.Error("Expected d20 roll to show '+3' modifier only")
 	}
 
-	// Non-d20 damage rolls should show full notation
-	if !strings.Contains(result, "[rollable]1d8+3;") {
-		t.Error("Expected damage roll to show '1d8+3' full notation")
+	// Non-d20 damage rolls should show full notation in parentheses
+	if !strings.Contains(result, "[rollable](1d8+3);") {
+		t.Error("Expected damage roll to show '(1d8+3)' full notation")
 	}
-	if !strings.Contains(result, "[rollable]1d4+3;") {
-		t.Error("Expected damage roll to show '1d4+3' full notation")
+	if !strings.Contains(result, "[rollable](1d4+3);") {
+		t.Error("Expected damage roll to show '(1d4+3)' full notation")
 	}
 
 	if len(warnings) != 0 {
