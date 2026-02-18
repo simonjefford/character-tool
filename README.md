@@ -97,6 +97,44 @@ The tool generates four files:
 
 Each file contains D&D Beyond-formatted text ready to paste into character sheets.
 
+## Clipboard Workflow (macOS)
+
+The `ddb-copy.sh` script automates copying output files to your clipboard for easy pasting into D&D Beyond.
+
+### Usage
+
+```bash
+./ddb-copy.sh path/to/character.md
+```
+
+This script:
+1. Runs character-tool with `--vault-mode` (outputs next to your input file)
+2. Copies each generated .txt file to clipboard in reverse order
+3. Files appear in your clipboard history app (like Paste, Maccy, etc.)
+4. Paste them into D&D Beyond in order from your clipboard history
+
+### Requirements
+
+- macOS (uses `pbcopy`)
+- Clipboard history app (recommended: Paste, Maccy, CopyClip)
+
+### Example Workflow
+
+```bash
+# 1. Run the script on your character file
+./ddb-copy.sh ~/Documents/fighter.md
+
+# Output:
+# ✓ Copied: traits.txt
+# ✓ Copied: reactions.txt
+# ✓ Copied: actions.txt
+# Done! 3 file(s) copied to clipboard history
+
+# 2. Open D&D Beyond character sheet
+# 3. Open your clipboard history app
+# 4. Paste each section into the corresponding D&D Beyond field
+```
+
 ## Obsidian Integration
 
 You can use character-tool directly from Obsidian using the Shell Commands community plugin. This allows you to format character files with a single command or keyboard shortcut.

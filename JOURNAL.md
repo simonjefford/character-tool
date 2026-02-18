@@ -1,5 +1,57 @@
 # Development Journal
 
+## [2026-02-18] Add Clipboard Workflow Script for D&D Beyond
+
+### Description
+Created `ddb-copy.sh` wrapper script that automates the workflow of running character-tool and copying output files to clipboard for pasting into D&D Beyond. Uses `pbcopy` to populate clipboard history with each output file.
+
+### Implementation
+Created `ddb-copy.sh` with the following features:
+
+1. **Vault-mode by default**: Runs character-tool with `--vault-mode` flag to output files next to the source markdown
+2. **Smart file detection**: Only looks for specific character-tool output files (traits.txt, actions.txt, bonus-actions.txt, reactions.txt)
+3. **Reverse order copying**: Copies files in reverse so they appear in correct order in clipboard history apps
+4. **Graceful handling**: Works correctly when some sections are missing (e.g., no bonus actions or reactions)
+5. **Visual feedback**: Color-coded output with green checkmarks and progress messages
+
+### Script Usage
+```bash
+./ddb-copy.sh path/to/character.md
+```
+
+The script:
+1. Runs character-tool with vault-mode
+2. Finds generated .txt files in the same directory as input
+3. Copies each file to clipboard with 0.3s delay between copies
+4. Reports how many files were copied
+
+### Design Decisions
+- **macOS-specific**: Uses `pbcopy` which is macOS-only. Could be extended for Linux/Windows in future.
+- **Clipboard history required**: Designed for use with clipboard managers (Paste, Maccy, CopyClip, etc.)
+- **Reverse order**: Files copied in reverse so user can paste in forward order from clipboard history
+- **Specific filenames**: Uses hardcoded list of expected output files rather than globbing to avoid issues in directories with many files
+- **Small delays**: 0.3s sleep between copies ensures clipboard history registers each copy as separate entry
+
+### Documentation
+Updated README.md with new "Clipboard Workflow (macOS)" section including:
+- Usage examples
+- Requirements (macOS, clipboard history app)
+- Example workflow showing full process
+- Integration with existing Obsidian section
+
+### Testing
+Tested with:
+- All four sections present (traits, actions, bonus-actions, reactions)
+- Subset of sections (traits + actions only)
+- Single section (actions only)
+- Files generated in various directories (/tmp, project root, subdirectories)
+
+All scenarios work correctly - script only copies files that exist.
+
+### Issues Encountered
+- Initial implementation used `find` with wildcard, which hung in /tmp due to too many files
+- Solution: Changed to explicitly check for each expected filename rather than globbing
+
 ## [2026-02-18] Fix Dice Roll Display Format for Non-d20 Rolls
 
 ### Description
