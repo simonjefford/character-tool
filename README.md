@@ -4,11 +4,13 @@ A Go CLI tool that converts markdown character descriptions into D&D Beyond-form
 
 ## Features
 
-- Converts markdown character sheets to D&D Beyond format
-- Generates rollable dice notation with proper metadata
-- Creates clickable spell links
-- Validates spell names and dice notation
-- Outputs separate files for each ability section
+- **Markdown to D&D Beyond format** - Convert character sheets with proper formatting
+- **Rollable dice notation** - Attack rolls show modifiers, damage rolls show averages
+- **Average damage calculation** - DMs can use averages (e.g., `8(1d8+3)`) for quick resolution
+- **Spell links** - Auto-generates `[spell]SpellName[/spell]` tags with validation
+- **Plain text support** - Include context paragraphs alongside named abilities
+- **Clipboard workflow** - macOS script to copy outputs directly to clipboard history
+- **Separate output files** - One file per section (traits, actions, bonus actions, reactions)
 
 ## Installation
 
@@ -101,6 +103,40 @@ Examples:
 
 Supported dice types: d4, d6, d8, d10, d12, d20, d100
 
+#### Dice Roll Display Format
+
+The tool formats dice rolls differently based on type:
+
+**Attack rolls (d20):** Show only the modifier
+- Input: `to hit: 1d20+5`
+- Output: `[rollable]+5;{...}[/rollable]`
+
+**Damage/Healing rolls (non-d20):** Show average and full notation
+- Input: `damage: 1d8+3`
+- Output: `[rollable]8(1d8+3);{...}[/rollable]`
+- Input: `damage: 2d6+7`
+- Output: `[rollable]14(2d6+7);{...}[/rollable]`
+
+The average is calculated as: `(number_of_dice × average_per_die) + modifier`, rounded to nearest integer. This allows DMs to quickly use average damage instead of rolling.
+
+### Plain Text Paragraphs
+
+You can include plain text paragraphs (without the `**Name.**` format) in any section to provide context or explanations:
+
+```markdown
+## Traits
+
+This character has enhanced abilities due to their elven heritage.
+
+**Darkvision.** You can see in dim light within 60 feet.
+
+The following traits come from their scholar background.
+
+**Researcher.** When attempting to learn information, you can consult your notes.
+```
+
+Plain text paragraphs are preserved in the output without the "Name." prefix.
+
 ## Output
 
 The tool generates four files:
@@ -180,17 +216,39 @@ See [docs/OBSIDIAN_INTEGRATION.md](docs/OBSIDIAN_INTEGRATION.md) for detailed in
 
 ## Example Output
 
+**Input markdown:**
+```markdown
+## Traits
+
+This half-elf has unique abilities from their heritage.
+
+**Darkvision.** You can see in dim light within 60 feet.
+
+## Actions
+
+**Longsword.** Melee Weapon Attack: to hit: 1d20+5, reach 5 ft. Hit: damage: 1d8+3 slashing.
+
+**Fire Bolt.** Ranged Spell Attack: to hit: 1d20+5, range 120 ft. Hit: damage: 1d10 fire damage.
+```
+
 **traits.txt:**
 ```
-Spellcasting. You can cast spells using [spell]Fireball[/spell] and [spell]Magic Missile[/spell].
+This half-elf has unique abilities from their heritage.
 
-Pack Tactics. You have advantage on attack rolls against a creature if at least one ally is within 5 feet.
+Darkvision. You can see in dim light within 60 feet.
 ```
 
 **actions.txt:**
 ```
-Quarterstaff. Melee Weapon Attack: [rollable]+2;{"diceNotation":"1d20+2","rollType":"to hit","rollAction":"Quarterstaff"}[/rollable], reach 5 ft., one target. Hit: [rollable]+2;{"diceNotation":"1d6+2","rollType":"damage","rollAction":"Quarterstaff"}[/rollable] bludgeoning damage.
+Longsword. Melee Weapon Attack: [rollable]+5;{"diceNotation":"1d20+5","rollType":"to hit","rollAction":"Longsword"}[/rollable], reach 5 ft. Hit: [rollable]8(1d8+3);{"diceNotation":"1d8+3","rollType":"damage","rollAction":"Longsword"}[/rollable] slashing.
+
+Fire Bolt. Ranged Spell Attack: [rollable]+5;{"diceNotation":"1d20+5","rollType":"to hit","rollAction":"Fire Bolt"}[/rollable], range 120 ft. Hit: [rollable]6(1d10);{"diceNotation":"1d10","rollType":"damage","rollAction":"Fire Bolt"}[/rollable] fire damage.
 ```
+
+Notice:
+- Plain text paragraph preserved without "Name." prefix
+- Attack rolls show modifier only: `+5`
+- Damage rolls show average and notation: `8(1d8+3)` and `6(1d10)`
 
 ## Development
 
