@@ -55,7 +55,7 @@ else
 fi
 
 echo -e "${BLUE}Running character-tool...${NC}"
-"$CHARACTER_TOOL" -i "$INPUT_FILE_ABS" --vault-mode
+"$CHARACTER_TOOL" -i "$INPUT_FILE_ABS" --vault-mode --verbose
 
 # Find generated .txt files (traits, actions, bonus-actions, reactions)
 TXT_FILES=()

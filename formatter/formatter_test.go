@@ -254,3 +254,61 @@ func TestFormatAbilities_D20VsDamageDisplay(t *testing.T) {
 		t.Errorf("Expected no warnings, got %v", warnings)
 	}
 }
+
+func TestFormatAbilities_PlainTextParagraphs(t *testing.T) {
+	abilities := []parser.Ability{
+		{
+			Name:        "",
+			Description: "This character has enhanced abilities due to their training.",
+			Type:        parser.Trait,
+		},
+		{
+			Name:        "Enhanced Reflexes",
+			Description: "You gain a +2 bonus to AC.",
+			Type:        parser.Trait,
+		},
+		{
+			Name:        "",
+			Description: "The following abilities are granted by their magical armor.",
+			Type:        parser.Trait,
+		},
+	}
+	spells := make(map[string]bool)
+
+	result, warnings, err := FormatAbilities(abilities, spells)
+
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+
+	// Plain text should not have "Name. " prefix
+	lines := strings.Split(result, "\n\n")
+	if len(lines) != 3 {
+		t.Fatalf("Expected 3 paragraphs, got %d", len(lines))
+	}
+
+	// First paragraph - plain text
+	if !strings.Contains(lines[0], "enhanced abilities") {
+		t.Error("Expected first paragraph to contain plain text")
+	}
+	if strings.HasPrefix(lines[0], ". ") {
+		t.Error("Plain text should not start with '. '")
+	}
+
+	// Second paragraph - named ability
+	if !strings.HasPrefix(lines[1], "Enhanced Reflexes. ") {
+		t.Error("Named ability should start with 'Enhanced Reflexes. '")
+	}
+
+	// Third paragraph - plain text
+	if !strings.Contains(lines[2], "magical armor") {
+		t.Error("Expected third paragraph to contain plain text")
+	}
+	if strings.HasPrefix(lines[2], ". ") {
+		t.Error("Plain text should not start with '. '")
+	}
+
+	if len(warnings) != 0 {
+		t.Errorf("Expected no warnings, got %v", warnings)
+	}
+}

@@ -149,12 +149,20 @@ func parseAbilities(content string, abilityType AbilityType) []Ability {
 		match := abilityRegex.FindStringSubmatch(paragraph)
 
 		if len(match) >= 3 {
+			// Named ability
 			name := strings.TrimSpace(match[1])
 			description := strings.TrimSpace(match[2])
 
 			abilities = append(abilities, Ability{
 				Name:        name,
 				Description: description,
+				Type:        abilityType,
+			})
+		} else {
+			// Plain text paragraph (no name)
+			abilities = append(abilities, Ability{
+				Name:        "",
+				Description: paragraph,
 				Type:        abilityType,
 			})
 		}

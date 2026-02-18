@@ -206,3 +206,51 @@ func TestParseMarkdown_PeriodPlacement(t *testing.T) {
 		t.Errorf("Expected name 'Fireball', got '%s'", result.BonusActions[1].Name)
 	}
 }
+
+func TestParseMarkdown_PlainTextParagraphs(t *testing.T) {
+	input := `## Traits
+
+This character has a mysterious background that grants them unique abilities.
+
+**Darkvision.** You can see in dim light within 60 feet.
+
+Due to their elven heritage, they also gain the following benefits.
+
+**Fey Ancestry.** You have advantage on saving throws against being charmed.`
+
+	result, err := ParseMarkdown(input)
+
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+
+	if len(result.Traits) != 4 {
+		t.Fatalf("Expected 4 traits (2 named + 2 plain text), got %d", len(result.Traits))
+	}
+
+	// First should be plain text
+	if result.Traits[0].Name != "" {
+		t.Errorf("Expected first trait to have no name, got '%s'", result.Traits[0].Name)
+	}
+	if !strings.Contains(result.Traits[0].Description, "mysterious background") {
+		t.Error("Expected first trait to contain plain text description")
+	}
+
+	// Second should be named ability
+	if result.Traits[1].Name != "Darkvision" {
+		t.Errorf("Expected second trait name 'Darkvision', got '%s'", result.Traits[1].Name)
+	}
+
+	// Third should be plain text
+	if result.Traits[2].Name != "" {
+		t.Errorf("Expected third trait to have no name, got '%s'", result.Traits[2].Name)
+	}
+	if !strings.Contains(result.Traits[2].Description, "elven heritage") {
+		t.Error("Expected third trait to contain plain text description")
+	}
+
+	// Fourth should be named ability
+	if result.Traits[3].Name != "Fey Ancestry" {
+		t.Errorf("Expected fourth trait name 'Fey Ancestry', got '%s'", result.Traits[3].Name)
+	}
+}
