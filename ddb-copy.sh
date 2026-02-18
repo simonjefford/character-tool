@@ -39,14 +39,23 @@ fi
 INPUT_FILE_ABS=$(cd "$(dirname "$INPUT_FILE")" && pwd)/$(basename "$INPUT_FILE")
 OUTPUT_DIR=$(dirname "$INPUT_FILE_ABS")
 
-# Check if character-tool exists
-if [ ! -f "./main.go" ]; then
-    echo "Error: Must be run from character-tool directory"
+# Find character-tool binary (check script directory first, then PATH)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/character-tool" ]; then
+    CHARACTER_TOOL="$SCRIPT_DIR/character-tool"
+elif command -v character-tool >/dev/null 2>&1; then
+    CHARACTER_TOOL="character-tool"
+else
+    echo "Error: character-tool binary not found"
+    echo "  - Not found in script directory: $SCRIPT_DIR/character-tool"
+    echo "  - Not found in PATH"
+    echo ""
+    echo "Build it with: go build -o character-tool"
     exit 1
 fi
 
 echo -e "${BLUE}Running character-tool...${NC}"
-go run main.go -i "$INPUT_FILE_ABS" --vault-mode
+"$CHARACTER_TOOL" -i "$INPUT_FILE_ABS" --vault-mode
 
 # Find generated .txt files (traits, actions, bonus-actions, reactions)
 TXT_FILES=()

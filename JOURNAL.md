@@ -1,5 +1,45 @@
 # Development Journal
 
+## [2026-02-18] Update Clipboard Script to Use Compiled Binary
+
+### Description
+Updated `ddb-copy.sh` to use the compiled `character-tool` binary instead of `go run`. Added `install.sh` script to install both the binary and script to `~/bin` for system-wide access.
+
+### Changes
+1. **Updated `ddb-copy.sh`:**
+   - Removed `go run main.go` in favor of compiled binary
+   - Removed directory check for main.go
+   - Added logic to find binary in script directory or PATH
+   - Provides helpful error message if binary not found
+
+2. **Created `install.sh`:**
+   - Builds the character-tool binary
+   - Copies both `character-tool` and `ddb-copy.sh` to `~/bin`
+   - Checks if `~/bin` is in PATH and provides instructions if not
+   - Makes scripts executable
+   - Color-coded output with status messages
+
+3. **Updated README.md:**
+   - Added "Quick Install (Recommended)" section
+   - Updated clipboard workflow examples to use installed commands
+   - Documented where script looks for binary
+
+### Design Decisions
+- **Compiled binary**: Much faster startup than `go run` (no compilation step)
+- **~/bin location**: Standard location for user binaries on Unix systems
+- **Flexible binary lookup**: Checks script directory first, then PATH for flexibility
+- **Install script**: Automates setup process and provides PATH instructions
+
+### Testing
+Tested:
+- Install script from project directory
+- Running `ddb-copy.sh` from various directories with binary in PATH
+- Error message when binary not found
+- Both scripts work correctly after installation
+
+### Issues Encountered
+None - implementation straightforward.
+
 ## [2026-02-18] Add Clipboard Workflow Script for D&D Beyond
 
 ### Description

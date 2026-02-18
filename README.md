@@ -12,6 +12,21 @@ A Go CLI tool that converts markdown character descriptions into D&D Beyond-form
 
 ## Installation
 
+### Quick Install (Recommended)
+
+Install to `~/bin` with the provided installer:
+
+```bash
+./install.sh
+```
+
+This will:
+1. Build the `character-tool` binary
+2. Copy both `character-tool` and `ddb-copy.sh` to `~/bin`
+3. Make them executable and available system-wide
+
+### Manual Build
+
 ```bash
 go build -o character-tool
 ```
@@ -19,13 +34,13 @@ go build -o character-tool
 ## Usage
 
 ```bash
-./character-tool --input character.md --output ./output
+character-tool --input character.md --output ./output
 ```
 
 Or using short flags:
 
 ```bash
-./character-tool -i character.md -o ./output
+character-tool -i character.md -o ./output
 ```
 
 ### Flags
@@ -101,10 +116,18 @@ Each file contains D&D Beyond-formatted text ready to paste into character sheet
 
 The `ddb-copy.sh` script automates copying output files to your clipboard for easy pasting into D&D Beyond.
 
+### Setup
+
+Install with `./install.sh` (recommended) or ensure `character-tool` is in your PATH.
+
+The script will look for the binary in:
+1. The same directory as the script
+2. Your PATH (e.g., `~/bin`)
+
 ### Usage
 
 ```bash
-./ddb-copy.sh path/to/character.md
+ddb-copy.sh path/to/character.md
 ```
 
 This script:
@@ -122,7 +145,7 @@ This script:
 
 ```bash
 # 1. Run the script on your character file
-./ddb-copy.sh ~/Documents/fighter.md
+ddb-copy.sh ~/Documents/fighter.md
 
 # Output:
 # ✓ Copied: traits.txt
