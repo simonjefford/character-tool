@@ -19,6 +19,15 @@ var validDice = map[string]bool{
 	"d100": true,
 }
 
+// Pre-compiled regular expressions for dice parsing
+var (
+	diceNotationRegex = regexp.MustCompile(`^(\d*)d(\d+)([+-]\d+)?$`)
+	rollPatternRegex  = regexp.MustCompile(`(to hit|damage|healing|save):\s*(\d*d\d+[+-]?\d*)`)
+	modifierRegex     = regexp.MustCompile(`[+-]\d+`)
+	d20RollRegex      = regexp.MustCompile(`^\d*d20([+-]\d+)?$`)
+	averageRegex      = regexp.MustCompile(`^(\d+)d(\d+)([+-]\d+)?$`)
+)
+
 // RollableData represents the JSON data embedded in rollable tags
 type RollableData struct {
 	DiceNotation string `json:"diceNotation"`
@@ -31,8 +40,7 @@ func ParseDiceNotation(notation string) (string, error) {
 	notation = strings.TrimSpace(notation)
 
 	// Match pattern: optional count + d + sides + optional modifier
-	re := regexp.MustCompile(`^(\d*)d(\d+)([+-]\d+)?$`)
-	matches := re.FindStringSubmatch(notation)
+	matches := diceNotationRegex.FindStringSubmatch(notation)
 
 	if matches == nil {
 		return "", errors.New("invalid dice notation format")
@@ -65,9 +73,7 @@ func ParseDiceNotation(notation string) (string, error) {
 func ConvertDiceRolls(text string, actionName string) (string, error) {
 	// Pattern to match roll type keywords followed by dice notation
 	// Supports: to hit:, damage:, healing:, save:
-	rollPattern := regexp.MustCompile(`(to hit|damage|healing|save):\s*(\d*d\d+[+-]?\d*)`)
-
-	result := rollPattern.ReplaceAllStringFunc(text, func(match string) string {
+	result := rollPatternRegex.ReplaceAllStringFunc(text, func(match string) string {
 		// Extract roll type and dice notation
 		parts := strings.SplitN(match, ":", 2)
 		if len(parts) != 2 {
@@ -113,15 +119,12 @@ func ConvertDiceRolls(text string, actionName string) (string, error) {
 
 // extractModifier extracts the +X or -X modifier from dice notation
 func extractModifier(notation string) string {
-	re := regexp.MustCompile(`[+-]\d+`)
-	match := re.FindString(notation)
-	return match
+	return modifierRegex.FindString(notation)
 }
 
 // isD20Roll checks if the dice notation uses d20 dice
 func isD20Roll(notation string) bool {
-	re := regexp.MustCompile(`^\d*d20([+-]\d+)?$`)
-	return re.MatchString(notation)
+	return d20RollRegex.MatchString(notation)
 }
 
 // getDisplayValue returns the display value for a rollable tag.
@@ -139,8 +142,7 @@ func getDisplayValue(notation string) string {
 // e.g., "2d6+3" -> (2 * 3.5) + 3 = 10
 func calculateAverage(notation string) int {
 	// Parse: count d sides +/- modifier
-	re := regexp.MustCompile(`^(\d+)d(\d+)([+-]\d+)?$`)
-	match := re.FindStringSubmatch(notation)
+	match := averageRegex.FindStringSubmatch(notation)
 
 	if len(match) < 3 {
 		return 0

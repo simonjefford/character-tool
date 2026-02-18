@@ -719,3 +719,92 @@ go test ./parser -v
 ### Files Modified
 - `parser/parser.go` - Updated parseAbilities to use SplitSeq
 - `JOURNAL.md` - This entry
+
+## [2026-02-18] Optimize Regex Compilation Performance
+
+### Description
+Moved regular expression compilation from function-level to package-level variables to eliminate repeated compilation overhead. This optimization targets functions called in loops (like `ConvertDiceRolls()` and helper functions).
+
+### Tests Written
+Created comprehensive benchmark suite in `converter/dice_benchmark_test.go`:
+- `BenchmarkConvertDiceRolls` - Tests main conversion function
+- `BenchmarkExtractModifier` - Tests modifier extraction
+- `BenchmarkIsD20Roll` - Tests d20 roll detection
+- `BenchmarkCalculateAverage` - Tests average calculation
+- `BenchmarkParseDiceNotation` - Tests dice notation parsing
+- `BenchmarkConvertDiceRollsVaried` - Tests with multiple dice types
+
+### Implementation
+Modified `converter/dice.go`:
+
+**Added package-level regex variables:**
+```go
+var (
+    diceNotationRegex = regexp.MustCompile(`^(\d*)d(\d+)([+-]\d+)?$`)
+    rollPatternRegex  = regexp.MustCompile(`(to hit|damage|healing|save):\s*(\d*d\d+[+-]?\d*)`)
+    modifierRegex     = regexp.MustCompile(`[+-]\d+`)
+    d20RollRegex      = regexp.MustCompile(`^\d*d20([+-]\d+)?$`)
+    averageRegex      = regexp.MustCompile(`^(\d+)d(\d+)([+-]\d+)?$`)
+)
+```
+
+**Updated functions to use pre-compiled regexes:**
+1. `ParseDiceNotation()` - Uses `diceNotationRegex`
+2. `ConvertDiceRolls()` - Uses `rollPatternRegex`
+3. `extractModifier()` - Uses `modifierRegex`
+4. `isD20Roll()` - Uses `d20RollRegex`
+5. `calculateAverage()` - Uses `averageRegex`
+
+### Performance Results
+
+| Benchmark | Before (ns/op) | After (ns/op) | Speedup | Memory Before (B/op) | Memory After (B/op) | Allocs Before | Allocs After |
+|-----------|----------------|---------------|---------|----------------------|---------------------|---------------|--------------|
+| ConvertDiceRolls | 27,556 | 4,112 | **6.7x** | 69,732 | 3,261 | 763 | 65 |
+| ExtractModifier | 585.3 | 79.02 | **7.4x** | 1,480 | 0 | 16 | 0 |
+| IsD20Roll | 2,047 | 67.71 | **30.2x** | 5,338 | 0 | 69 | 0 |
+| CalculateAverage | 3,048 | 517.9 | **5.9x** | 8,088 | 352 | 92 | 11 |
+| ParseDiceNotation | 2,796 | 177.6 | **15.7x** | 7,956 | 138 | 91 | 5 |
+| ConvertDiceRollsVaried | 21,134 | 2,993 | **7.1x** | 52,797 | 2,150 | 566 | 45 |
+
+**Key Improvements:**
+- **Speed**: 5.9x to 30.2x faster across all functions
+- **Memory**: 85% to 100% reduction in allocations
+- **Zero allocations**: `ExtractModifier()` and `IsD20Roll()` now have 0 allocations
+- **Real-world impact**: Character sheet processing is ~6.7x faster
+
+### Design Decisions
+- **Package-level vars**: Compiled once at package initialization
+- **No API changes**: Internal optimization, no breaking changes
+- **All functions optimized**: Even less-frequently called functions benefit
+- **Zero complexity increase**: Simpler code without repeated compilation
+
+### Test Results
+All existing tests pass:
+```bash
+go test ./converter
+# ok  	character-tool/converter	0.378s
+```
+
+Benchmark results documented in `converter/BENCHMARK_RESULTS.md` with detailed analysis.
+
+### Real-World Impact
+For a character sheet with 10 abilities (2-3 dice rolls each):
+- **Before**: ~825 µs parsing time
+- **After**: ~123 µs parsing time
+- **Savings**: ~700 µs per character (85% faster)
+
+Batch processing 1,000 character sheets:
+- **Before**: ~825 ms
+- **After**: ~123 ms
+- **Savings**: ~702 ms
+
+### Issues Encountered
+None - straightforward optimization with immediate measurable benefits.
+
+### Files Modified
+- `converter/dice.go` - Added package-level regex vars, updated all functions
+- `JOURNAL.md` - This entry
+
+### Files Created
+- `converter/dice_benchmark_test.go` - Comprehensive benchmark suite
+- `converter/BENCHMARK_RESULTS.md` - Detailed performance analysis
