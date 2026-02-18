@@ -137,9 +137,7 @@ func parseAbilities(content string, abilityType AbilityType) []Ability {
 	}
 
 	// Split by paragraph breaks to separate abilities
-	paragraphs := strings.Split(content, "\n\n")
-
-	for _, paragraph := range paragraphs {
+	for paragraph := range strings.SplitSeq(content, "\n\n") {
 		paragraph = strings.TrimSpace(paragraph)
 		if paragraph == "" {
 			continue

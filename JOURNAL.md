@@ -494,3 +494,29 @@ Documentation now makes clear:
 - Only four specific keywords are supported
 - Provides correct usage patterns
 - Shows common mistakes to avoid
+
+## [2026-02-18] Refactor to Use strings.SplitSeq
+
+### Issue
+Linter warning: "Ranging over SplitSeq is more efficient" in parser.go:140
+
+### Changes Made
+Replaced `strings.Split()` with `strings.SplitSeq()` for more efficient iteration:
+- **Before**: `paragraphs := strings.Split(content, "\n\n")` then `for _, paragraph := range paragraphs`
+- **After**: `for paragraph := range strings.SplitSeq(content, "\n\n")`
+
+### Benefits
+- **Memory Efficiency**: SplitSeq returns an iterator, avoiding intermediate slice allocation
+- **Performance**: Lazily generates values instead of allocating entire slice upfront
+- **Modern Go**: Uses Go 1.23+ iterator pattern
+
+### Testing
+All existing parser tests pass without modification:
+```bash
+go test ./parser -v
+# All 8 tests PASS
+```
+
+### Files Modified
+- `parser/parser.go` - Updated parseAbilities to use SplitSeq
+- `JOURNAL.md` - This entry
