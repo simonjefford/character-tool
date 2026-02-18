@@ -84,8 +84,8 @@ func ConvertDiceRolls(text string, actionName string) (string, error) {
 			return match
 		}
 
-		// Extract modifier for display
-		modifier := extractModifier(normalized)
+		// Get display value based on dice type
+		displayValue := getDisplayValue(normalized)
 
 		// Create rollable data
 		data := RollableData{
@@ -99,9 +99,9 @@ func ConvertDiceRolls(text string, actionName string) (string, error) {
 			return match
 		}
 
-		// Format: [rollable]MODIFIER;JSON[/rollable]
-		// The modifier is displayed, the JSON contains the roll info
-		displayValue := modifier
+		// Format: [rollable]DISPLAY_VALUE;JSON[/rollable]
+		// For d20: displays modifier only (e.g., "+5")
+		// For non-d20: displays full notation (e.g., "1d8+5")
 		if displayValue == "" {
 			return fmt.Sprintf("[rollable];%s[/rollable]", jsonData)
 		}
@@ -116,4 +116,20 @@ func extractModifier(notation string) string {
 	re := regexp.MustCompile(`[+-]\d+`)
 	match := re.FindString(notation)
 	return match
+}
+
+// isD20Roll checks if the dice notation uses d20 dice
+func isD20Roll(notation string) bool {
+	re := regexp.MustCompile(`^\d*d20([+-]\d+)?$`)
+	return re.MatchString(notation)
+}
+
+// getDisplayValue returns the display value for a rollable tag.
+// For d20 rolls: returns only the modifier (e.g., "+5" or "")
+// For non-d20 rolls: returns full dice notation (e.g., "1d8+5")
+func getDisplayValue(notation string) string {
+	if isD20Roll(notation) {
+		return extractModifier(notation)
+	}
+	return notation
 }

@@ -76,7 +76,7 @@ func TestConvertDiceRolls_Damage(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	expected := `[rollable]+3;{"diceNotation":"2d6+3","rollType":"damage","rollAction":"Greatsword"}[/rollable]`
+	expected := `[rollable]2d6+3;{"diceNotation":"2d6+3","rollType":"damage","rollAction":"Greatsword"}[/rollable]`
 	if result != expected {
 		t.Errorf("Expected:\n%s\nGot:\n%s", expected, result)
 	}
@@ -92,8 +92,8 @@ func TestConvertDiceRolls_NoModifier(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	// No modifier in display value
-	expected := `[rollable];{"diceNotation":"1d10","rollType":"damage","rollAction":"Fire Bolt"}[/rollable]`
+	// Non-d20 should show full notation
+	expected := `[rollable]1d10;{"diceNotation":"1d10","rollType":"damage","rollAction":"Fire Bolt"}[/rollable]`
 	if result != expected {
 		t.Errorf("Expected:\n%s\nGot:\n%s", expected, result)
 	}
@@ -185,5 +185,95 @@ func TestExtractModifier_None(t *testing.T) {
 	mod := extractModifier("1d20")
 	if mod != "" {
 		t.Errorf("Expected empty string, got '%s'", mod)
+	}
+}
+
+func TestGetDisplayValue_D20Rolls(t *testing.T) {
+	tests := []struct {
+		notation string
+		expected string
+	}{
+		{"1d20+5", "+5"},
+		{"1d20", ""},
+		{"1d20-2", "-2"},
+		{"d20+10", "+10"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.notation, func(t *testing.T) {
+			result := getDisplayValue(tt.notation)
+			if result != tt.expected {
+				t.Errorf("Expected '%s', got '%s'", tt.expected, result)
+			}
+		})
+	}
+}
+
+func TestGetDisplayValue_NonD20Rolls(t *testing.T) {
+	tests := []struct {
+		notation string
+		expected string
+	}{
+		{"1d10+5", "1d10+5"},
+		{"2d6+3", "2d6+3"},
+		{"1d8", "1d8"},
+		{"1d4-1", "1d4-1"},
+		{"3d6", "3d6"},
+		{"1d12+4", "1d12+4"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.notation, func(t *testing.T) {
+			result := getDisplayValue(tt.notation)
+			if result != tt.expected {
+				t.Errorf("Expected '%s', got '%s'", tt.expected, result)
+			}
+		})
+	}
+}
+
+func TestConvertDiceRolls_VariousDiceTypes(t *testing.T) {
+	tests := []struct {
+		name         string
+		input        string
+		actionName   string
+		expectedDisp string
+	}{
+		{
+			name:         "D20 attack roll",
+			input:        "to hit: 1d20+5",
+			actionName:   "Longsword",
+			expectedDisp: "+5",
+		},
+		{
+			name:         "D8 damage roll",
+			input:        "damage: 1d8+3",
+			actionName:   "Longsword",
+			expectedDisp: "1d8+3",
+		},
+		{
+			name:         "D6 damage roll",
+			input:        "damage: 2d6+2",
+			actionName:   "Greatsword",
+			expectedDisp: "2d6+2",
+		},
+		{
+			name:         "D10 damage no modifier",
+			input:        "damage: 1d10",
+			actionName:   "Fire Bolt",
+			expectedDisp: "1d10",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := ConvertDiceRolls(tt.input, tt.actionName)
+			if err != nil {
+				t.Errorf("Expected no error, got %v", err)
+			}
+			if !strings.Contains(result, "[rollable]"+tt.expectedDisp+";") {
+				t.Errorf("Expected display value '%s' in result, got:\n%s", tt.expectedDisp, result)
+			}
+		})
 	}
 }

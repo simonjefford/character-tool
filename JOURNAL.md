@@ -1,5 +1,65 @@
 # Development Journal
 
+## [2026-02-18] Fix Dice Roll Display Format for Non-d20 Rolls
+
+### Description
+Changed dice roll display format so that non-d20 rolls show the full dice notation in the rollable tag, while d20 rolls continue to show only the modifier. This makes damage rolls more informative (e.g., `[rollable]1d8+5;...` instead of `[rollable]+5;...`).
+
+### Tests Written/Modified
+1. **New Tests in `converter/dice_test.go`:**
+   - `TestGetDisplayValue_D20Rolls` - Verifies d20 rolls show only modifier (+5, empty string, -2, etc.)
+   - `TestGetDisplayValue_NonD20Rolls` - Verifies non-d20 rolls show full notation (1d10+5, 2d6+3, 1d8, etc.)
+   - `TestConvertDiceRolls_VariousDiceTypes` - Integration test for mixed d20 and non-d20 rolls
+
+2. **Updated Tests in `converter/dice_test.go`:**
+   - `TestConvertDiceRolls_Damage` - Changed expected from `[rollable]+3;` to `[rollable]2d6+3;`
+   - `TestConvertDiceRolls_NoModifier` - Changed expected from `[rollable];` to `[rollable]1d10;`
+
+3. **New Test in `formatter/formatter_test.go`:**
+   - `TestFormatAbilities_D20VsDamageDisplay` - End-to-end test verifying d20 shows modifier only while damage shows full notation
+
+### Implementation Details
+Modified `converter/dice.go`:
+
+1. **Added `isD20Roll()` helper function** (line 122-125):
+   - Uses regex `^\d*d20([+-]\d+)?$` to identify d20 rolls
+   - Returns true if notation uses d20 dice
+
+2. **Added `getDisplayValue()` function** (line 127-135):
+   - Returns only the modifier for d20 rolls (e.g., "+5" or "")
+   - Returns full notation for non-d20 rolls (e.g., "1d8+5")
+   - Centralizes display logic in one place
+
+3. **Updated `ConvertDiceRolls()` function** (line 87-88):
+   - Replaced `modifier := extractModifier(normalized)`
+   - With `displayValue := getDisplayValue(normalized)`
+   - Updated comments to reflect new behavior
+
+### Design Decisions
+- **Why differentiate d20 vs non-d20**: In D&D, attack rolls (d20) are familiar to players and the modifier is the key information. Damage rolls use varied dice (d4, d6, d8, d10, d12) and showing the full notation helps players understand what they're rolling.
+- **Implementation approach**: Added helper functions rather than modifying existing `extractModifier()` to maintain backward compatibility and clear separation of concerns.
+- **Regex pattern**: Used strict pattern `^\d*d20([+-]\d+)?$` to ensure only actual d20 rolls match, preventing edge cases.
+
+### Test Results
+All tests pass:
+- `go test ./... -v` - All 30+ tests passing
+- `go vet ./...` - No issues
+- `gofmt -w .` - Code formatted
+
+### Manual Verification
+Created test markdown with mixed rolls:
+- Longsword (d20+5 to hit, d8+5 damage) ✓
+- Dagger (d20+3 to hit, d4+3 damage) ✓
+- Greatsword (d20+7 to hit, 2d6+7 damage) ✓
+- Fire Bolt (d20+5 to hit, 1d10 damage no modifier) ✓
+
+Output correctly shows:
+- To hit rolls: `[rollable]+5;...`, `[rollable]+3;...`, etc.
+- Damage rolls: `[rollable]1d8+5;...`, `[rollable]1d4+3;...`, `[rollable]2d6+7;...`, `[rollable]1d10;...`
+
+### Issues Encountered
+None - implementation went smoothly following TDD approach.
+
 ## [2026-02-17] Project Initialization
 
 ### Changes Made

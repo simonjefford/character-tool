@@ -212,3 +212,45 @@ func TestFormatAbilities_WithDiceAndSpells(t *testing.T) {
 		t.Errorf("Expected no warnings, got %v", warnings)
 	}
 }
+
+func TestFormatAbilities_D20VsDamageDisplay(t *testing.T) {
+	abilities := []parser.Ability{
+		{
+			Name:        "Longsword",
+			Description: "Melee Weapon Attack: to hit: 1d20+5, reach 5 ft., one target. Hit: damage: 1d8+3 slashing.",
+			Type:        parser.Action,
+		},
+		{
+			Name:        "Dagger",
+			Description: "Melee or Ranged Weapon Attack: to hit: 1d20+3, reach 5 ft. Hit: damage: 1d4+3 piercing.",
+			Type:        parser.Action,
+		},
+	}
+	spells := make(map[string]bool)
+
+	result, warnings, err := FormatAbilities(abilities, spells)
+
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+
+	// D20 rolls should show only modifier
+	if !strings.Contains(result, "[rollable]+5;") {
+		t.Error("Expected d20 roll to show '+5' modifier only")
+	}
+	if !strings.Contains(result, "[rollable]+3;") {
+		t.Error("Expected d20 roll to show '+3' modifier only")
+	}
+
+	// Non-d20 damage rolls should show full notation
+	if !strings.Contains(result, "[rollable]1d8+3;") {
+		t.Error("Expected damage roll to show '1d8+3' full notation")
+	}
+	if !strings.Contains(result, "[rollable]1d4+3;") {
+		t.Error("Expected damage roll to show '1d4+3' full notation")
+	}
+
+	if len(warnings) != 0 {
+		t.Errorf("Expected no warnings, got %v", warnings)
+	}
+}
