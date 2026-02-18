@@ -126,10 +126,42 @@ func isD20Roll(notation string) bool {
 
 // getDisplayValue returns the display value for a rollable tag.
 // For d20 rolls: returns only the modifier (e.g., "+5" or "")
-// For non-d20 rolls: returns notation in parentheses (e.g., "(1d8+5)")
+// For non-d20 rolls: returns average and notation (e.g., "8(1d8+5)")
 func getDisplayValue(notation string) string {
 	if isD20Roll(notation) {
 		return extractModifier(notation)
 	}
-	return "(" + notation + ")"
+	avg := calculateAverage(notation)
+	return fmt.Sprintf("%d(%s)", avg, notation)
+}
+
+// calculateAverage calculates the average result of a dice notation
+// e.g., "2d6+3" -> (2 * 3.5) + 3 = 10
+func calculateAverage(notation string) int {
+	// Parse: count d sides +/- modifier
+	re := regexp.MustCompile(`^(\d+)d(\d+)([+-]\d+)?$`)
+	match := re.FindStringSubmatch(notation)
+
+	if len(match) < 3 {
+		return 0
+	}
+
+	count := 0
+	sides := 0
+	modifier := 0
+
+	fmt.Sscanf(match[1], "%d", &count)
+	fmt.Sscanf(match[2], "%d", &sides)
+
+	if len(match) >= 4 && match[3] != "" {
+		fmt.Sscanf(match[3], "%d", &modifier)
+	}
+
+	// Average of a die: (sides + 1) / 2.0
+	// Total average: count * avg_per_die + modifier
+	avgPerDie := float64(sides+1) / 2.0
+	total := float64(count)*avgPerDie + float64(modifier)
+
+	// Round to nearest integer
+	return int(total + 0.5)
 }
